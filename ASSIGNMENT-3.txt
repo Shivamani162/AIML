@@ -1,0 +1,621 @@
+ASSIGNMENT-3
+
+QUESTION-1
+
+import collections
+import random
+import math
+import functools
+
+# Setting up an LRU cache with a maximum size of 10**6
+cache = functools.lru_cache(maxsize=10**6)
+
+class Game:
+    """A general Game class to define common game mechanics."""
+
+    def actions(self, state):
+        """Return a collection of the allowable moves from this state."""
+        raise NotImplementedError
+
+    def result(self, state, move):
+        """Return the state that results from making a move from a state."""
+        raise NotImplementedError
+
+    def is_terminal(self, state):
+        """Return True if this is a final state for the game."""
+        return not self.actions(state)
+
+    def utility(self, state, player):
+        """Return the value of this final state to player."""
+        raise NotImplementedError
+
+class TicTacToe(Game):
+    """A Tic-Tac-Toe game subclass of the Game class."""
+
+    def __init__(self):
+        self.initial = [[' ' for _ in range(3)] for _ in range(3)]  # 3x3 board initialized with empty spaces
+
+    def actions(self, state):
+        """Return a list of possible moves given a state."""
+        return [(r, c) for r in range(3) for c in range(3) if state[r][c] == ' ']
+
+    def result(self, state, move):
+        """Return the new state after making a move."""
+        r, c = move
+        new_state = [row[:] for row in state]
+        new_state[r][c] = 'X' if self.to_move(state) == 'X' else 'O'
+        return new_state
+
+    def is_terminal(self, state):
+        """Check if the game has reached a terminal state."""
+        # Check for a win or a full board
+        return self.check_win(state) or not self.actions(state)
+
+    def utility(self, state, player):
+        """Determine the utility of the state for a given player."""
+        if self.check_win(state, 'X'):
+            return 1 if player == 'X' else -1
+        elif self.check_win(state, 'O'):
+            return 1 if player == 'O' else -1
+        else:
+            return 0
+
+    def to_move(self, state):
+        """Return the player whose turn it is to move."""
+        x_count = sum(row.count('X') for row in state)
+        o_count = sum(row.count('O') for row in state)
+        return 'X' if x_count <= o_count else 'O'
+
+    def check_win(self, state, player=None):
+        """Check if a player has won."""
+        lines = [
+            # Rows
+            state[0], state[1], state[2],
+            # Columns
+            [state[0][0], state[1][0], state[2][0]],
+            [state[0][1], state[1][1], state[2][1]],
+            [state[0][2], state[1][2], state[2][2]],
+            # Diagonals
+            [state[0][0], state[1][1], state[2][2]],
+            [state[0][2], state[1][1], state[2][0]]
+        ]
+        if player:
+            return any(line == [player, player, player] for line in lines)
+        else:
+            return any(line == ['X', 'X', 'X'] for line in lines) or any(line == ['O', 'O', 'O'] for line in lines)
+
+def print_board(state):
+    """Utility function to print the current state of the board."""
+    print("\n".join([" | ".join(row) for row in state]))
+    print()
+
+# Initialize the TicTacToe game
+game = TicTacToe()
+
+# Start with the initial state
+current_state = game.initial
+print("Initial board state:")
+print_board(current_state)
+
+# Sequence of moves
+moves = [(0, 0), (1, 1), (0, 1), (1, 2), (0, 2)]  # X wins with this sequence
+
+# Simulate the moves
+for move in moves:
+    current_player = game.to_move(current_state)
+    print(f"Player {current_player} makes move {move}:")
+    current_state = game.result(current_state, move)
+    print_board(current_state)
+
+    if game.is_terminal(current_state):
+        print("Game over!")
+        if game.utility(current_state, 'X') == 1:
+            print("Player X wins!")
+        elif game.utility(current_state, 'O') == 1:
+            print("Player O wins!")
+        else:
+            print("It's a draw!")
+        break
+
+QUESTION-2
+
+import math
+import random
+
+class Game:
+    """A general Game class to define common game mechanics."""
+
+    def actions(self, state):
+        """Return a collection of the allowable moves from this state."""
+        raise NotImplementedError
+
+    def result(self, state, move):
+        """Return the state that results from making a move from a state."""
+        raise NotImplementedError
+
+    def is_terminal(self, state):
+        """Return True if this is a final state for the game."""
+        return not self.actions(state)
+
+    def utility(self, state, player):
+        """Return the value of this final state to player."""
+        raise NotImplementedError
+
+class TicTacToe(Game):
+    """A Tic-Tac-Toe game subclass of the Game class."""
+
+    def __init__(self):
+        self.initial = [[' ' for _ in range(3)] for _ in range(3)]  # 3x3 board initialized with empty spaces
+
+    def actions(self, state):
+        """Return a list of possible moves given a state."""
+        return [(r, c) for r in range(3) for c in range(3) if state[r][c] == ' ']
+
+    def result(self, state, move):
+        """Return the new state after making a move."""
+        r, c = move
+        new_state = [row[:] for row in state]
+        new_state[r][c] = 'X' if self.to_move(state) == 'X' else 'O'
+        return new_state
+
+    def is_terminal(self, state):
+        """Check if the game has reached a terminal state."""
+        # Check for a win or a full board
+        return self.check_win(state) or not self.actions(state)
+
+    def utility(self, state, player):
+        """Determine the utility of the state for a given player."""
+        if self.check_win(state, 'X'):
+            return 1 if player == 'X' else -1
+        elif self.check_win(state, 'O'):
+            return 1 if player == 'O' else -1
+        else:
+            return 0
+
+    def to_move(self, state):
+        """Return the player whose turn it is to move."""
+        x_count = sum(row.count('X') for row in state)
+        o_count = sum(row.count('O') for row in state)
+        return 'X' if x_count <= o_count else 'O'
+
+    def check_win(self, state, player=None):
+        """Check if a player has won."""
+        lines = [
+            # Rows
+            state[0], state[1], state[2],
+            # Columns
+            [state[0][0], state[1][0], state[2][0]],
+            [state[0][1], state[1][1], state[2][1]],
+            [state[0][2], state[1][2], state[2][2]],
+            # Diagonals
+            [state[0][0], state[1][1], state[2][2]],
+            [state[0][2], state[1][1], state[2][0]]
+        ]
+        if player:
+            return any(line == [player, player, player] for line in lines)
+        else:
+            return any(line == ['X', 'X', 'X'] for line in lines) or any(line == ['O', 'O', 'O'] for line in lines)
+
+def minimax_search(game, state):
+    """Search game tree to determine best move; return (value, move) pair."""
+    player = game.to_move(state)
+
+    def max_value(state):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = -math.inf, None
+        for a in game.actions(state):
+            v2, _ = min_value(game.result(state, a))
+            if v2 > v:
+                v, move = v2, a
+        return v, move
+
+    def min_value(state):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = math.inf, None
+        for a in game.actions(state):
+            v2, _ = max_value(game.result(state, a))
+            if v2 < v:
+                v, move = v2, a
+        return v, move
+
+    return max_value(state)
+
+def alphabeta_search(game, state):
+    """Search game to determine best action using alpha-beta pruning."""
+    player = game.to_move(state)
+
+    def max_value(state, alpha, beta):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = -math.inf, None
+        for a in game.actions(state):
+            v2, _ = min_value(game.result(state, a), alpha, beta)
+            if v2 > v:
+                v, move = v2, a
+            alpha = max(alpha, v)
+            if v >= beta:
+                return v, move
+        return v, move
+
+    def min_value(state, alpha, beta):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = math.inf, None
+        for a in game.actions(state):
+            v2, _ = max_value(game.result(state, a), alpha, beta)
+            if v2 < v:
+                v, move = v2, a
+            beta = min(beta, v)
+            if v <= alpha:
+                return v, move
+        return v, move
+
+    return max_value(state, -math.inf, math.inf)
+
+def print_board(state):
+    """Utility function to print the current state of the board."""
+    print("\n".join([" | ".join(row) for row in state]))
+    print()
+
+# Initialize the TicTacToe game
+game = TicTacToe()
+
+# Set the initial state
+state = game.initial
+
+# Determine the best move for Player X using MiniMax
+value, move = minimax_search(game, state)
+print(f"MiniMax: Best move for Player X is {move} with value {value}")
+
+# Determine the best move for Player X using Alpha-Beta
+value, move = alphabeta_search(game, state)
+print(f"Alpha-Beta: Best move for Player X is {move} with value {value}")
+
+
+QUESTION-3
+
+import random
+from collections import defaultdict
+
+class Game:
+    """A general Game class to define common game mechanics."""
+
+    def actions(self, state):
+        """Return a collection of the allowable moves from this state."""
+        raise NotImplementedError
+
+    def result(self, state, move):
+        """Return the state that results from making a move from a state."""
+        raise NotImplementedError
+
+    def is_terminal(self, state):
+        """Return True if this is a final state for the game."""
+        return not self.actions(state)
+
+    def utility(self, state, player):
+        """Return the value of this final state to player."""
+        raise NotImplementedError
+
+
+class TicTacToe(Game):
+    """Play TicTacToe on a 'height' by 'width' board, needing 'k' in a row to win."""
+
+    def __init__(self, height=3, width=3, k=3):
+        self.k = k  # k in a row to win
+        self.squares = {(x, y) for x in range(width) for y in range(height)}
+        self.initial = Board(height=height, width=width, to_move='X', utility=0)
+
+    def actions(self, board):
+        """Legal moves are any square not yet taken."""
+        return self.squares - set(board.keys())
+
+    def result(self, board, square):
+        """Place a marker for current player on square."""
+        player = board.to_move
+        new_board = board.new({square: player}, to_move=('O' if player == 'X' else 'X'))
+        win = self.k_in_row(new_board, player, square, self.k)
+        new_board.utility = (0 if not win else +1 if player == 'X' else -1)
+        return new_board
+
+    def utility(self, board, player):
+        """Return the value to player; 1 for win, -1 for loss, 0 otherwise."""
+        return board.utility if player == 'X' else -board.utility
+
+    def is_terminal(self, board):
+        """A board is a terminal state if it is won or there are no empty squares."""
+        return board.utility != 0 or len(self.squares) == len(board)
+
+    def display(self, board):
+        """Display the board."""
+        print(board)
+
+    def k_in_row(self, board, player, square, k):
+        """True if player has k pieces in a line through square."""
+        def in_row(x, y, dx, dy):
+            return 0 if board[x, y] != player else 1 + in_row(x + dx, y + dy, dx, dy)
+        
+        return any(in_row(*square, dx, dy) + in_row(*square, -dx, -dy) - 1 >= k
+                   for (dx, dy) in ((0, 1), (1, 0), (1, 1), (1, -1)))
+
+
+class Board(defaultdict):
+    """A board has the player to move, a cached utility value, and a dict of {(x, y): player} entries."""
+
+    empty = '.'
+    off = '#'
+
+    def __init__(self, width=8, height=8, to_move=None, utility=0, **kwds):
+        super().__init__(lambda: Board.empty)
+        self.width = width
+        self.height = height
+        self.to_move = to_move
+        self.utility = utility
+        self.update(**kwds)
+
+    def new(self, changes: dict, **kwds) -> 'Board':
+        """Given a dict of {(x, y): contents} changes, return a new Board with the changes."""
+        board = Board(width=self.width, height=self.height, **kwds)
+        board.update(self)
+        board.update(changes)
+        return board
+
+    def __missing__(self, loc):
+        x, y = loc
+        if 0 <= x < self.width and 0 <= y < self.height:
+            return self.empty
+        else:
+            return self.off
+
+    def __hash__(self):
+        return hash(tuple(sorted(self.items()))) + hash(self.to_move)
+
+    def __repr__(self):
+        def row(y): return ' '.join(self[x, y] for x in range(self.width))
+        return '\n'.join(map(row, range(self.height))) + '\n'
+
+
+def random_player(game, state):
+    """A random player that selects a random move."""
+    return random.choice(list(game.actions(state)))
+
+
+def player(search_algorithm):
+    """A game player who uses the specified search algorithm."""
+    return lambda game, state: search_algorithm(game, state)[1]
+
+
+def play_game(game, strategies: dict, verbose=False):
+    """Play a turn-taking game."""
+    state = game.initial
+    while not game.is_terminal(state):
+        player = state.to_move
+        move = strategies[player](game, state)
+        state = game.result(state, move)
+        if verbose:
+            print(f'Player {player} move: {move}')
+            game.display(state)
+    return state
+
+
+# Example Usage:
+# Initialize the TicTacToe game
+game = TicTacToe()
+
+# Set player strategies
+strategies = {
+    'X': random_player,
+    'O': random_player  # or use player(minimax_search) / player(alphabeta_search)
+}
+
+# Play the game with verbose output
+final_state = play_game(game, strategies, verbose=True)
+print("Final State:")
+game.display(final_state)
+
+
+
+QUESTION-4
+
+import random
+from collections import defaultdict
+import math
+
+# Base Game class
+class Game:
+    """A general Game class to define common game mechanics."""
+
+    def actions(self, state):
+        """Return a collection of the allowable moves from this state."""
+        raise NotImplementedError
+
+    def result(self, state, move):
+        """Return the state that results from making a move from a state."""
+        raise NotImplementedError
+
+    def is_terminal(self, state):
+        """Return True if this is a final state for the game."""
+        return not self.actions(state)
+
+    def utility(self, state, player):
+        """Return the value of this final state to player."""
+        raise NotImplementedError
+
+
+# TicTacToe class
+class TicTacToe(Game):
+    """Play TicTacToe on a 'height' by 'width' board, needing 'k' in a row to win."""
+
+    def __init__(self, height=3, width=3, k=3):
+        self.k = k  # k in a row to win
+        self.squares = {(x, y) for x in range(width) for y in range(height)}
+        self.initial = Board(height=height, width=width, to_move='X', utility=0)
+
+    def actions(self, board):
+        """Legal moves are any square not yet taken."""
+        return self.squares - set(board.keys())
+
+    def result(self, board, square):
+        """Place a marker for current player on square."""
+        player = board.to_move
+        new_board = board.new({square: player}, to_move=('O' if player == 'X' else 'X'))
+        win = self.k_in_row(new_board, player, square, self.k)
+        new_board.utility = (0 if not win else +1 if player == 'X' else -1)
+        return new_board
+
+    def utility(self, board, player):
+        """Return the value to player; 1 for win, -1 for loss, 0 otherwise."""
+        return board.utility if player == 'X' else -board.utility
+
+    def is_terminal(self, board):
+        """A board is a terminal state if it is won or there are no empty squares."""
+        return board.utility != 0 or len(self.squares) == len(board)
+
+    def display(self, board):
+        """Display the board."""
+        print(board)
+
+    def k_in_row(self, board, player, square, k):
+        """True if player has k pieces in a line through square."""
+        def in_row(x, y, dx, dy):
+            return 0 if board[x, y] != player else 1 + in_row(x + dx, y + dy, dx, dy)
+        
+        return any(in_row(*square, dx, dy) + in_row(*square, -dx, -dy) - 1 >= k
+                   for (dx, dy) in ((0, 1), (1, 0), (1, 1), (1, -1)))
+
+
+# Board class
+class Board(defaultdict):
+    """A board has the player to move, a cached utility value, and a dict of {(x, y): player} entries."""
+
+    empty = '.'
+    off = '#'
+
+    def __init__(self, width=8, height=8, to_move=None, utility=0, **kwds):
+        super().__init__(lambda: Board.empty)
+        self.width = width
+        self.height = height
+        self.to_move = to_move
+        self.utility = utility
+        self.update(**kwds)
+
+    def new(self, changes: dict, **kwds) -> 'Board':
+        """Given a dict of {(x, y): contents} changes, return a new Board with the changes."""
+        board = Board(width=self.width, height=self.height, **kwds)
+        board.update(self)
+        board.update(changes)
+        return board
+
+    def __missing__(self, loc):
+        x, y = loc
+        if 0 <= x < self.width and 0 <= y < self.height:
+            return self.empty
+        else:
+            return self.off
+
+    def __hash__(self):
+        return hash(tuple(sorted(self.items()))) + hash(self.to_move)
+
+    def __repr__(self):
+        def row(y): return ' '.join(self[x, y] for x in range(self.width))
+        return '\n'.join(map(row, range(self.height))) + '\n'
+
+
+# Random player strategy
+def random_player(game, state):
+    """A random player that selects a random move."""
+    return random.choice(list(game.actions(state)))
+
+
+# Minimax search algorithm
+def minimax_search(game, state):
+    """Search game tree to determine best move; return (value, move) pair."""
+    player = state.to_move
+
+    def max_value(state):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = -math.inf, None
+        for a in game.actions(state):
+            v2, _ = min_value(game.result(state, a))
+            if v2 > v:
+                v, move = v2, a
+        return v, move
+
+    def min_value(state):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = math.inf, None
+        for a in game.actions(state):
+            v2, _ = max_value(game.result(state, a))
+            if v2 < v:
+                v, move = v2, a
+        return v, move
+
+    return max_value(state)
+
+
+# Alpha-beta pruning search algorithm
+def alphabeta_search(game, state):
+    """Search game to determine best action; use alpha-beta pruning."""
+    player = state.to_move
+
+    def max_value(state, alpha, beta):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = -math.inf, None
+        for a in game.actions(state):
+            v2, _ = min_value(game.result(state, a), alpha, beta)
+            if v2 > v:
+                v, move = v2, a
+            alpha = max(alpha, v)
+            if v >= beta:
+                return v, move
+        return v, move
+
+    def min_value(state, alpha, beta):
+        if game.is_terminal(state):
+            return game.utility(state, player), None
+        v, move = math.inf, None
+        for a in game.actions(state):
+            v2, _ = max_value(game.result(state, a), alpha, beta)
+            if v2 < v:
+                v, move = v2, a
+            beta = min(beta, v)
+            if v <= alpha:
+                return v, move
+        return v, move
+
+    return max_value(state, -math.inf, math.inf)
+
+
+# Game player based on search algorithm
+def player(search_algorithm):
+    """A game player who uses the specified search algorithm."""
+    return lambda game, state: search_algorithm(game, state)[1]
+
+
+# Function to play the game
+def play_game(game, strategies: dict, verbose=False):
+    """Play a turn-taking game."""
+    state = game.initial
+    while not game.is_terminal(state):
+        player = state.to_move
+        move = strategies[player](game, state)
+        state = game.result(state, move)
+        if verbose:
+            print(f'Player {player} move: {move}')
+            game.display(state)
+    return state
+
+
+# Scenario 1: Random player vs Alpha-beta search player
+print("Scenario 1: Random player vs Alpha-beta search player")
+final_state = play_game(TicTacToe(), {'X': random_player, 'O': player(alphabeta_search)}, verbose=True)
+print("Final Utility:", final_state.utility)
+
+# Scenario 2: Alpha-beta search player vs Minimax search player
+print("\nScenario 2: Alpha-beta search player vs Minimax search player")
+final_state = play_game(TicTacToe(), {'X': player(alphabeta_search), 'O': player(minimax_search)}, verbose=True)
+print("Final Utility:", final_state.utility)
