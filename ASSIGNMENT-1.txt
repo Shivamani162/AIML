@@ -1,0 +1,133 @@
+ASSIGNMENT-1
+
+QUESTION-1
+
+import numpy as np
+import pandas as pd
+
+
+list1 = [1, 2, 3, 4, 5]
+list2 = [6, 7, 8, 9, 10]
+
+print("List 1:", list1)
+print("List 2:", list2)
+
+
+array1 = np.array(list1)
+array2 = np.array(list2)
+
+print("Array 1:", array1)
+print("Array 2:", array2)
+
+
+print("Type of list1:", type(list1))
+print("Type of array1:", type(array1))
+
+multiplication = array1 * array2
+print("Multiplication of arrays:", multiplication)
+
+
+division = array1 / array2
+print("Division of arrays:", division)
+
+
+power = np.power(array1, 2)
+print("Power of array1:", power)
+
+
+addition = array1 + array2
+print("Addition of Two: array1 + array2 =", addition)
+
+
+sin_values = np.sin(array1)
+print("Sine of array1:", sin_values)
+
+log_values = np.log(array1)
+print("Log of array1:", log_values)
+
+
+log2_values = np.log2(array1)
+print("Log2 of array1:", log2_values)
+
+
+exp_values = np.exp(array1)
+print("Exponential of array1:", exp_values)
+
+
+QUESTION-2
+
+import matplotlib.pyplot as plt
+
+
+data = {
+    'people': ['kiran', 'arun', 'vijay', 'varun'],
+    'age': [25, 30, 35, 40],
+    'height': [145, 151, 165, 173],
+    'weight': [45, 55, 65, 75]
+}
+
+
+plt.scatter(data['height'], data['weight'])
+plt.xlabel('Height (cm)')
+plt.ylabel('Weight (kg)')
+plt.title('Scatter Plot: Height vs. Weight')
+plt.grid(True)
+plt.show()
+
+
+plt.bar(data['people'], data['age'])
+plt.xlabel('People')
+plt.ylabel('Age')
+plt.title('Bar Chart: Age of Individuals')
+plt.xticks(rotation=45)
+plt.show()
+
+
+plt.hist(data['age'], bins=5, edgecolor='black')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.title('Histogram: Age Distribution')
+plt.grid(True)
+plt.show()
+
+
+QUESTION-3
+
+import pandas as pd
+from google.colab import files
+import requests
+
+data = {
+    'Name': ['John', 'Alice', 'Bob'],
+    'Age': [25, 30, 22],
+    'City': ['New York', 'Los Angeles', 'Chicago']
+}
+df = pd.DataFrame(data)
+
+df.to_csv('dataset.csv', index=False)  # Save as CSV
+df.to_excel('dataset.xlsx', index=False)  # Save as Excel
+df.to_csv('dataset.tsv', sep='\t', index=False)  # Save as TSV
+
+print("Upload the TSV file:")
+uploaded_tsv = files.upload()
+df_tsv = pd.read_csv('dataset.tsv', sep='\t')
+print("TSV Data:")
+print(df_tsv)
+
+print("Upload the CSV file:")
+uploaded_csv = files.upload()
+df_csv = pd.read_csv('dataset.csv')
+print("CSV Data:")
+print(df_csv)
+
+print("Upload the Excel file:")
+uploaded_excel = files.upload()
+df_excel = pd.read_excel('dataset.xlsx')
+print("Excel Data:")
+print(df_excel)
+
+url = 'https://example.com/data.txt'  # Replace with your desired URL
+response = requests.get(url)
+text_data = response.text
+print("Text Data from URL:")
+print(text_data)
